@@ -45,6 +45,7 @@ public class DV_extract {
 
 	private static List<String> allPath_one;
 	private static Map<String,Map<String,Double>> allwordsTF;
+	private static Map<String,Double> allWordTermHood;//记录所有的词的termhood的值
 
 
 	public static void main(String[] args) {
@@ -57,8 +58,9 @@ public class DV_extract {
 		//		System.out.println(calWordDF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","中国/ns 石化/n "));
 		//		System.out.println(calFileTF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords\\content_1260973.txt","中国/ns 石化/n "));
 		//		System.out.println(calFileAveTF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","天津/ns 石化/n "));
-		calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords");
-//		writePageTermhood(sort_hood(calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords")),"C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTF");
+		//		calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords");
+		writePageTermhood(sort_hood(calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords")),"C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood");
+		sortAllTermHood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood\\allSort.txt");
 	}
 
 
@@ -438,7 +440,9 @@ public class DV_extract {
 		double df = 0;
 		double index = 0;
 		double finalTf = 0;
+		int count = 1;//计数，可删去
 		Map<String,Map<String,Double>> allWordsTF = new HashMap<>(); 
+		allWordTermHood = new HashMap<>();//记录所有的termhood值，作为总的排序输出
 		try {
 			for(String path : getAllPath(inputpath)){
 				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),FileUtils.getFileEncode(path)));		
@@ -455,8 +459,9 @@ public class DV_extract {
 					index = caltermIndex(inputpath,word);
 					finalTf = tf * df * index;
 					wordTF.put(word, finalTf);
-					System.out.println(word+" "+wordTF.get(word));
+					allWordTermHood.put(word, finalTf);//所有词
 				}
+				System.out.println("add "+(count++));
 				//所有文章词的TF
 				allWordsTF.put(path, wordTF);
 			}
@@ -496,8 +501,8 @@ public class DV_extract {
 		}	
 		return sort_termhood;
 	}
-	
-	
+
+
 	/**
 	 * @Description: 写出每篇文章的Termhood
 	 * @param:
@@ -506,15 +511,17 @@ public class DV_extract {
 	 */
 	public static void writePageTermhood(Map<String,List<Map.Entry<String,Double>>> page_list,String targetpath){
 		BufferedWriter bw = null;
+		int count = 1;
 		try {
 			for(String path : page_list.keySet()){
 				String name = getFileNameFromPath(path);
-				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetpath +"/"+name+".txt"), "utf-8"));
+				bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(targetpath +"/"+name+".txt")), "utf-8"));
 				for(Map.Entry<String, Double> list : page_list.get(path)){
 					bw.write(list.getKey() +":"+list.getValue());
 					bw.newLine();
 					bw.flush();
 				}
+				System.out.println("write"+ count++);
 			}
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
@@ -532,6 +539,52 @@ public class DV_extract {
 				}
 			}
 		}
+	}
+
+
+
+
+	/**
+	 * @Description: 1 对所有的termhood的值进行排序    2  输出到指定文件
+	 * @param:
+	 * @return:
+	 * @date: 2017-12-14  
+	 */
+	public static void sortAllTermHood(String targetpath){
+		BufferedWriter bw = null;
+		try {
+			//排序
+			List<Map.Entry<String, Double>> sortTermhood = new ArrayList<>(allWordTermHood.entrySet());
+			Collections.sort(sortTermhood,new Comparator<Map.Entry<String, Double>>() {
+				@Override
+				public int compare(Entry<String, Double> o1,
+						Entry<String, Double> o2) {
+					return o2.getValue().compareTo(o1.getValue());
+				}
+			});
+			//输出
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(targetpath), "UTF-8"));
+			for(Map.Entry<String, Double> entry : sortTermhood){
+				bw.write(entry.getKey() +" : "+entry.getValue());
+				bw.newLine();
+				bw.flush();
+			}
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+			if(bw!=null){
+				try {
+					bw.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 	}
 
 
@@ -595,9 +648,9 @@ public class DV_extract {
 		for(String p : su.allPathResult){
 		}
 	}
-	
-	
-	
+
+
+
 	/**
 	 * @Description: 抽取文件基础路径
 	 * @param:
@@ -618,9 +671,9 @@ public class DV_extract {
 		}
 		return result;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * 从文件的完整路径中，抽取其文件名称
 	 * @param path
