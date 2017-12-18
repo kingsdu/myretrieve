@@ -165,7 +165,7 @@ public class StringUtils {
 		}
 		try {
 			File file = new File(inputPath);
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),FileUtils.getFileEncode(inputPath)));
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"utf-8"));
 			String temp = "";
 			while((temp=br.readLine()) != null){
 				result += (temp+ConstantParams.CHENG_LINE);
@@ -192,7 +192,7 @@ public class StringUtils {
 		BufferedWriter bw = null;
 		try {
 			File file = new File(outputPath);
-			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),"gbk"));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file),"utf-8"));
 			bw.write(str);
 			b = true;
 		} catch (Exception e) {
@@ -228,7 +228,7 @@ public class StringUtils {
 		BufferedWriter bw = null;
 		try {
 			File file = new File(outputPath);
-			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file,true),"gbk"));
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file,true),"utf-8"));
 			bw.write(str);
 			b = true;
 		} catch (Exception e) {
@@ -281,7 +281,7 @@ public class StringUtils {
 		try {
 			File file = new File(inputPath);
 			InputStream is = new FileInputStream(file);
-			InputStreamReader isr = new InputStreamReader(is,"gbk");
+			InputStreamReader isr = new InputStreamReader(is,FileUtils.getFileEncode(inputPath));
 			BufferedReader br = new BufferedReader(isr);
 			String temp = "";
 			while((temp=br.readLine()) != null){

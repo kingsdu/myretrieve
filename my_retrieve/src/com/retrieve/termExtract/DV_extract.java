@@ -49,18 +49,18 @@ public class DV_extract {
 
 
 	public static void main(String[] args) {
-		//		extractWeb("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\www.sinopecnews.com.cn\\news\\content");
-		//		splitWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\rawTxt","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\splitWord");
-		//		extractbyRule("G:\\TermExtract\\dic\\split\\rule.txt","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\splitWord","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordSet");
-		//		fliterWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordSet","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords");
-		//		delWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\delrepwords");
+//		extractWeb("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\www.sinopecnews.com.cn\\news\\content");
+//				splitWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\rawTxt","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\splitWord");
+//				extractbyRule("G:\\TermExtract\\dic\\split\\rule.txt","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\splitWord","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordSet");
+//				fliterWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordSet","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords");
+//				delWord("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\delrepwords");
 		//		System.out.println(calWordTF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","中国/ns 石化/n "));
 		//		System.out.println(calWordDF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","中国/ns 石化/n "));
 		//		System.out.println(calFileTF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords\\content_1260973.txt","中国/ns 石化/n "));
 		//		System.out.println(calFileAveTF("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords","天津/ns 石化/n "));
 		//		calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords");
-		writePageTermhood(sort_hood(calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords")),"C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood");
-		sortAllTermHood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood\\allSort.txt");
+				writePageTermhood(sort_hood(calTermhood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\filterwords")),"C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood");
+		//		sortAllTermHood("C:\\resource\\行业网站\\crawlData\\oilGas\\中石化新闻网\\1\\mirror\\wordsTermhood\\alltermhood1.txt");
 	}
 
 
@@ -186,9 +186,9 @@ public class DV_extract {
 		double wordCount = 0;//记录文档总词数
 		try {
 			for(String path : allPath_one){
-				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),FileUtils.getFileEncode(path)));
+				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),"utf-8"));
 				String calWord = "";
-				while((calWord=br.readLine())!=null){
+				while((calWord = br.readLine())!=null){
 					wordCount++;
 					if(word.equals(calWord)){
 						if(wordTF.get(word) == null){
@@ -226,7 +226,7 @@ public class DV_extract {
 		try {
 			//读取所有文件信息
 			for(String path : allPath_one){
-				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),FileUtils.getFileEncode(path)));
+				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),"utf-8"));
 				Set<String> words = new HashSet<String>();
 				String calWord = "";
 				while((calWord = br.readLine())!=null){
@@ -445,7 +445,7 @@ public class DV_extract {
 		allWordTermHood = new HashMap<>();//记录所有的termhood值，作为总的排序输出
 		try {
 			for(String path : getAllPath(inputpath)){
-				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),FileUtils.getFileEncode(path)));		
+				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path),"utf-8"));		
 				List<String> words = new ArrayList<>();//一篇文档中所有词
 				Map<String,Double> wordTF = new HashMap<>();//<词,tf>
 				String line = "";

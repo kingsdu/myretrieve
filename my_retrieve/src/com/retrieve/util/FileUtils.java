@@ -324,9 +324,9 @@ public class FileUtils {
 		BufferedReader br = null;
 		String line = null;
 		StringBuilder sb = null;
-		String charset = getFileEncode(path);//获取字符编码格式
+//		String charset = getFileEncode(path);//获取字符编码格式
 		try {
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(file),charset));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"utf-8"));
 			sb = new StringBuilder();
 			while((line = br.readLine())!=null){
 				sb.append(line);

@@ -35,4 +35,8 @@ public class ConstantParams {
 	/*文件后缀名称*/
 	public static final String TXTSUFFIX = ".txt";
 	
+	
+	public static final String EvaluationTRUE = "1";
+	public static final String EvaluationFALSE = "0";
+	
 }
