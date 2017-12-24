@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.retrieve.config.ConstantParams;
+import com.retrieve.stringhelper.string;
 
 public class StringUtils {
 
@@ -49,6 +50,7 @@ public class StringUtils {
 			b = true;
 		}
 		return b;
+		
 	}
 
 	/**

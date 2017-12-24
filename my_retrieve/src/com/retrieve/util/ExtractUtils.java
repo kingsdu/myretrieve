@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ public class ExtractUtils {
 	private static Map<String,Double> wordCount_txt = new HashMap<>();//某词在某篇文章中出现的次数
 	private static List<String> contained = new ArrayList<>();//去除所有文本中的重复词语
 	private static Map<String,Double> noave_Object = new HashMap<>();//每个词未平均的object值
+	private static double ave_confidence_0 = 0,ave_confidence_1 = 0;//置信区间的平均置信点
 
 
 	/**
@@ -820,21 +822,21 @@ public class ExtractUtils {
 	public static void main(String args[]) throws UnsupportedEncodingException, FileNotFoundException{	
 		String rawtxtInputPath = "D:/testpackage/Thepaper/rawTxt";
 		String splitTxtPath = "D:/testpackage/Thepaper/splitWords";
-		String ruleTxtPath = Thread.currentThread().getContextClassLoader().getResource("rules.txt").getPath();
+		String ruleTxtPath = "D:/testpackage/Thepaper/rule.txt";
 		String wordsRuleSetsPath = "D:/testpackage/Thepaper/wordsRuleSets";
 		String filterwordsPath = "D:/testpackage/Thepaper/filterwords";
 		String delrepwordsPath = "D:/testpackage/Thepaper/delrepwords";
 		String integrationPath = "D:/testpackage/Thepaper/integration";
-		String resultWordsPath = "D:/testpackage/Thepaper/result.dic";
+		String resultWordsPath = "D:/testpackage/Thepaper/resultWords/result.dic";
 		String stablePath = "D:/testpackage/Thepaper/stableWords";
 		String filterDic = "D:/testpackage/Thepaper/resultFilter.dic";
 		String delDic = "D:/testpackage/Thepaper/resultWords/resultDel.dic";
 		String fliterTF = "D:/testpackage/Thepaper/resultWords/fliterTF.dic";
 		String wordsTFPath = "D:/testpackage/Thepaper/wordsTF";
 		String splitIKPath = "D:/testpackage/Thepaper/splitIK";
-		String objectPath = "D:/testpackage/Thepaper/resultWords/finalres_Words.dic";
+		String objectPath = "D:/testpackage/Thepaper/resultWords/finalfobject.dic";
 		String evaluationPath = "D:/testpackage/Thepaper/resultWords/evalution_del.dic";
-		String sortObjectPath = "D:/testpackage/Thepaper/resultWords/sortObject_result.txt";
+		String sortObjectPath = "D:/testpackage/Thepaper/resultWords/sortObject_result.dic";
 		String withsame_Path = "D:/testpackage/Thepaper/resultWords/01.dic";
 		String rules_secondpath = "D:/testpackage/Thepaper/rules_second.txt";
 
@@ -854,31 +856,31 @@ public class ExtractUtils {
 		//			String fileName = StringUtils.getFileNameFromPath(path);
 		//			ExtractUtils.singleTextWordsSet(ruleTxtPath, path, wordsRuleSetsPath+"/"+fileName+".txt");
 		//		}	
-		//		//3 过滤特殊词（单子动词，特殊符号... ...）
+		//3 过滤特殊词（单子动词，特殊符号... ...）
 		//		su = new StringUtils(wordsRuleSetsPath);
 		//		for(String fileName : su.allPathResult){
 		//			String f = StringUtils.getFileNameFromPath(fileName);
 		//			ExtractUtils.filterWords(fileName, filterwordsPath+"/"+f+".txt");
 		//		}
-		//		//4 重复的候选词
-		//		su = new StringUtils(filterwordsPath);
-		//		List<String> filterwordsPaths = su.allPathResult;
+		//4 重复的候选词
+		su = new StringUtils(filterwordsPath);
+		List<String> filterwordsPaths = su.allPathResult;
 		//		for(String fileName : filterwordsPaths){
 		//			String f = StringUtils.getFileNameFromPath(fileName);
 		//			ExtractUtils.delRepWords(fileName, delrepwordsPath+"/"+f+".txt");
 		//		}
 		//		//5 生成完整性关键词
-		//		su = new StringUtils(delrepwordsPath);
-		//		List<String> delrepwordsPaths = su.allPathResult;
-		//		for(int i=0;i<delrepwordsPaths.size();i++){
-		//			String fileName = StringUtils.getFileNameFromPath(delrepwordsPaths.get(i));
-		//			//6 生成完整性和稳定性过滤的词
-		//			ExtractUtils.getObject(filterwordsPaths.get(i), resultWordsPath, ExtractUtils.filterInteWords(delrepwordsPaths.get(i),splitTxtPaths.get(i),integrationPath+"/"+fileName+".txt"),stablePath+"/"+fileName+".txt");
-		//		}
-		//		//7 生成IK词典
-		//		genInteDic(resultWordsPath,filterDic);
-		//		//8 去重
-		//		ExtractUtils.delRepWords(filterDic,delDic);
+		su = new StringUtils(delrepwordsPath);
+		List<String> delrepwordsPaths = su.allPathResult;
+		for(int i=0;i<delrepwordsPaths.size();i++){
+			String fileName = StringUtils.getFileNameFromPath(delrepwordsPaths.get(i));
+			//6 生成完整性和稳定性过滤的词
+			ExtractUtils.getObject(filterwordsPaths.get(i), resultWordsPath, ExtractUtils.filterInteWords(delrepwordsPaths.get(i),splitTxtPaths.get(i),integrationPath+"/"+fileName+".txt"),stablePath+"/"+fileName+".txt");
+		}
+		//7 生成IK词典
+		genInteDic(resultWordsPath,filterDic);
+		//8 去重
+		ExtractUtils.delRepWords(filterDic,delDic);
 
 		// 计算同现与否词典
 		//		su = new StringUtils(stablePath);
@@ -941,59 +943,52 @@ public class ExtractUtils {
 		//		//写出排序结果
 		//		StringUtils.string2File(final_object, objectPath);
 
-
-		//		//14  分别计算1和0的object中的置信度
-		calConfidence(evaluationPath,objectPath);//计算置信度
-
-
-
-		//		//		Entry<String, Double> ev0_List = StringUtils.getMapMaxValue(ev0_word);
-		//		//		Entry<String, Double> ev1_List = StringUtils.getMapMaxValue(ev1_word);
+		//		String evalution = StringUtils.getContent(evaluationPath);
+		//		String[] evalutionSplit = evalution.split(ConstantParams.CHENG_LINE);
 		//
-		//		//		double ev0_max = ev0_List.getValue();	
-		//		//		double ev1_max = ev1_List.getValue();
+		//		Map<String,Double> ev0_word = new HashMap<>();
+		//		Map<String,Double> ev1_word = new HashMap<>();
+		//		//将object中的0和1分开
+		//		for(int i=0;i<evalutionSplit.length;i++){
+		//			String[] ev_word = evalutionSplit[i].split(ConstantParams.SINGLE_BLANK);
+		//			if(ev_word[1].equals("0")){
+		//				ev0_word.put(ev_word[0], 0.0);
+		//			}
+		//			else{
+		//				ev1_word.put(ev_word[0], 1.0);
+		//			}
+		//		}
+		//		
+		//		//14  分别计算1和0的object中的置信区间平均值
+		//		calConfidence(ev0_word,ev1_word,objectPath);//计算置信度
 		//
-		//		double K = (ev1_max-ev0_max)/(1-0);
+		//		double K = (ave_confidence_1-ave_confidence_0)/(1-0);
 		//
-		//		change0_1(K,1,ev0_word,objectPath,sortObjectPath);
+		//		change0_1(K,1,ev0_word,ev1_word,objectPath,sortObjectPath);
 	}
 
 
 
 
 	/**
-	 * @Description: 计算置信度
+	 * @Description: 计算置信区间的平均值
 	 * @param:
 	 * @return:
 	 * @date: 2017-12-18  
 	 */
-	private static void calConfidence(String evaluationPath,String objectPath) {
-		String evalution = StringUtils.getContent(evaluationPath);
-		String[] evalutionSplit = evalution.split(ConstantParams.CHENG_LINE);
-
-		Map<String,Double> ev0_word = new HashMap<>();
-		//		Map<String,Double> ev1_word = new HashMap<>();
-		//将object中的0和1分开
-		for(int i=0;i<evalutionSplit.length;i++){
-			String[] ev_word = evalutionSplit[i].split(ConstantParams.SINGLE_BLANK);
-			if(ev_word[1].equals("0")){
-				ev0_word.put(ev_word[0], 0.0);
-			}
-			//			else{
-			//				ev1_word.put(ev_word[0], 1.0);
-			//			}
-		}
-
-		//		//根据分开的0和1，在对概率的分布值进行处理，求出其中的0和1的置信区间
+	private static void calConfidence(Map<String,Double> ev0_word,Map<String,Double> ev1_word,String objectPath) {
+		//根据分开的0和1，在对概率的分布值进行处理，求出其中的0和1的置信区间
 		String content = StringUtils.getContent(objectPath);//f-object总排名,利用其计算置信度
 		String[] content_split = content.split(ConstantParams.CHENG_LINE);
 		double c_Confidence_0 = 0, l_Confidence_0 = 0;//0的置信区间范围
+		double c_Confidence_1 = 0, l_Confidence_1 = 0;//1的置信区间范围
 		double ave_0 = 0,ave_1 = 0;//均值
 		double variance_0 = 0,variance_1 = 0;//方差
 		//存基础数据
 		List<Double> object_value_0 = new ArrayList<>();
 		List<Double> object_value_1 = new ArrayList<>();
-		double t = 3.291;//t分布，α=0.0025
+		double t = 2.807;//t分布，α=0.0025
+		double count = 0;
 		int N = content_split.length;//样本总个数	
 		for(int i=0;i<content_split.length;i++){
 			String[] word = content_split[i].split(ConstantParams.SINGLE_BLANK);			
@@ -1006,29 +1001,102 @@ public class ExtractUtils {
 			if(ev0_word.containsKey(word[0])){
 				if(ev0_word.get(word[0])!=null){
 					//写出				
-//					write_01(content_split[i]);
+					//					write_01(content_split[i]);
 					object_value_0.add(Double.valueOf(word[1]));
 					ave_0+= Double.valueOf(word[1]);
 				}	
+			}else if(ev1_word.containsKey(word[0])){
+				if(ev1_word.get(word[0])!=null){
+					//写出				
+					//					write_02(content_split[i]);
+					object_value_1.add(Double.valueOf(word[1]));
+					ave_1+= Double.valueOf(word[1]);
+				}
 			}
 		}
 		ave_0/=N; 
-		//方差
+		ave_1/=N;
+		//0的方差
 		for(Double value : object_value_0){
 			variance_0 +=Math.pow((value-ave_0), 2);
 		}
 		variance_0/=N-1;
-		//置信度
+		//1的方差
+		for(Double value : object_value_1){
+			variance_1 +=Math.pow((value-ave_1), 2);
+		}
+		variance_1/=N-1;
+		//0的置信区间
 		c_Confidence_0 = ave_0 - t*(N-1) * (variance_0/Math.sqrt(N)); 
 		l_Confidence_0 = ave_0 + t*(N-1) * (variance_0/Math.sqrt(N)); 
-		System.out.println(c_Confidence_0);
-		System.out.println(l_Confidence_0);
+		//1的置信区间
+		c_Confidence_1 = ave_1 - t*(N-1) * (variance_1/Math.sqrt(N)); 
+		l_Confidence_1 = ave_1 + t*(N-1) * (variance_1/Math.sqrt(N)); 
+
+
+		for(double value :object_value_0){
+			if(value>=c_Confidence_0 && value<=l_Confidence_0){
+				count++;
+				ave_confidence_0+=value;
+			}
+		}
+		ave_confidence_0/=count;
+
+		count = 0;
+		for(double value :object_value_1){
+			if(value>=c_Confidence_1 && value<=l_Confidence_1){
+				count++;
+				ave_confidence_1+=value;
+			}
+		}
+		ave_confidence_1/=count;
+		//		System.out.println(c_Confidence_0);
+		//		System.out.println(l_Confidence_0);
+		//		System.out.println("---------------");
+		//		System.out.println(c_Confidence_1);
+		//		System.out.println(l_Confidence_1);
+		//		System.out.println("---------------");
+		//		System.out.println(ave_confidence_0+"  "+ave_confidence_1);
 	}
 
 
 
 	/**
-	 * @Description: 写出01的词和值
+	 * @Description: 写出1的词和值
+	 * @param:
+	 * @return:
+	 * @date: 2017-12-19  
+	 */
+	private static void write_02(String string) {
+		String inputpath = "D:/testpackage/Thepaper/resultWords/1.dic";
+		BufferedWriter bw = null;
+		try {
+			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(inputpath,true), "utf-8"));
+			bw.write(string);
+			bw.newLine();
+			bw.flush();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			if(bw!=null){
+				try {
+					bw.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * @Description: 写出0的词和值
 	 * @param:
 	 * @return:
 	 * @date: 2017-12-18  
@@ -1067,8 +1135,8 @@ public class ExtractUtils {
 	 * @return:
 	 * @date: 2017-11-1  
 	 */
-	public static void change0_1(double K,double X,Map<String,Double> ev0_word,String objectPath,String outputPath){
-		Map<String,Double> change_ev1 = new TreeMap<>();
+	public static void change0_1(double K,double X,Map<String,Double> ev0_word,Map<String,Double> ev1_word,String objectPath,String outputPath){
+		Map<String,Double> allMap = new HashMap<String,Double>();
 		//读取objectPath中的频率值
 		String content = StringUtils.getContent(objectPath);
 		String[] content_split = content.split(ConstantParams.CHENG_LINE);
@@ -1076,22 +1144,26 @@ public class ExtractUtils {
 			String[] word = content_split[i].split(ConstantParams.SINGLE_BLANK);
 			String key = word[0];
 			if(ev0_word.containsKey(key)){
-				double Y0 = Double.valueOf(word[1]);
-				double Y =  K*(X-0)-Y0;
-				change_ev1.put(key, Y);	
+				if(ev0_word.get(key)!=null){
+					double Y0 = Double.valueOf(word[1]);
+					double Y =  K*(X-0)-Y0;
+					allMap.put(key, Y);	
+				}
+			}
+			else if(ev1_word.containsKey(key)){
+				if(ev1_word.get(key)!=null){
+					double Y1 = Double.valueOf(word[1]);
+					allMap.put(key, Y1);	
+				}
 			}
 		}
-
-		List<Entry<String,Double>> sortMapByValue = StringUtils.sortMapByValue(change_ev1);	
+		List<Entry<String,Double>> sortMapByValue = StringUtils.sortMapByValue(allMap);	
 		String fin_result = "";
 		for(Map.Entry<String, Double> entry : sortMapByValue){
 			fin_result+=entry.getKey() + ConstantParams.SINGLE_BLANK + entry.getValue() + ConstantParams.CHENG_LINE;
 		}
 		StringUtils.string2File(fin_result, outputPath);
 	}
-
-
-
 }
 
 //String rawtxtInputPath = "G:/data/e430/hetritrix/output/sina/20/mirror/rawTxt";
